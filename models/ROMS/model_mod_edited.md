@@ -9,7 +9,7 @@ Overview
 This is the DART interface to the [Regional Ocean Modeling System](https://www.myroms.org) - **ROMS**. This document describes the
 relationship between ROMS and DART and provides an overview of how to perform ensemble data assimilation with ROMS to provide ocean states that are consistent with the information provided by various ocean observations.
 
-Running ROMS is complicated. It is **strongly** recommended that you become very familiar with running ROMS before you attempt a ROMS-DART assimilation experiment. Running DART is complicated. It is **strongly** recommended that you become very familiar with running DART before you attempt a ROMS-DART assimilation experiment. Running ROMS-DART takes expertise in both areas.
+Running ROMS is complicated. It is **strongly** recommended that you become very familiar with running ROMS before you attempt a ROMS-DART assimilation experiment. Running ROMS-DART takes expertise in both areas.
 
 We recommend working through the [DART tutorial](../../documentation/tutorial/index.html) to learn the concepts of ensemble data assimilation and the capabilities of DART.
 
