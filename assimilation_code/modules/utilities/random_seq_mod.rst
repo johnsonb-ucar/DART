@@ -1,640 +1,392 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-"http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<meta name="generator" content=
-"HTML Tidy for HTML5 for Apple macOS version 5.6.0">
-<title>module random_seq_mod</title>
-<link rel="stylesheet" type="text/css" href=
-"../../../docs/html/doc.css">
-<link href="../../../docs/images/dart.ico" rel="shortcut icon">
-</head>
-<body>
-<a name="TOP" id="TOP"></a>
-<h1>MODULE random_seq_mod</h1>
-<table border="0" summary="" cellpadding="5">
-<tr>
-<td valign="middle"><img src="../../../docs/images/Dartboard7.png"
-alt="DART project logo" height="70"></td>
-<td>Jump to <a href="../../../docs/index.html">DART Documentation
-Main Index</a></td>
-</tr>
-</table>
-<a href="#Interface">INTERFACES</a> / <a href=
-"#Namelist">NAMELIST</a> / <a href="#FilesUsed">FILES</a> /
-<a href="#References">REFERENCES</a> / <a href="#Errors">ERRORS</a>
-/ <a href="#FuturePlans">PLANS</a> / <a href=
-"#PrivateComponents">PRIVATE COMPONENTS</a> / <a href=
-"#Legalese">TERMS OF USE</a>
-<h2>Overview</h2>
-<p>Provides access to any number of reproducible random sequences.
-Can sample from uniform, gaussian, two-dimensional gaussian, gamma,
-inverse gamma, and exponential distributions.</p>
-<p>The current random sequence generator is a Fortran version of
-the <a href="http://www.gnu.org/software/gsl/">GNU Library</a>
-implementation of the <a href=
-"http://en.wikipedia.org/wiki/Mersenne_twister">Mersenne
-Twister</a> algorithm. The original code is in the C language and
-the conversion to Fortran was done by the DART team.</p>
-<p>There are test programs in the <em class=
-"file">developer_tests/random_seq</em> directory which show
-examples of calling these routines. Build and run these tests in
-the <em class="file">test</em> subdirectory.</p>
-<!--==================================================================-->
-<a name="OtherModulesUsed" id="OtherModulesUsed"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>OTHER MODULES USED</h2>
-<pre>
-types_mod
-utilities_mod
-</pre>
-<!--==================================================================-->
-<!-- Declare all public entities ...                                  -->
-<!-- duplicate public routines template as many times as necessary    -->
-<!-- make sure you replace all yyyroutine?? strings                   -->
-<!--==================================================================-->
-<!--Note to authors. The first row of the table is different.         -->
-<!--==================================================================-->
-<a name="Interface" id="Interface"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>PUBLIC INTERFACES</h2>
-<table>
-<tr>
-<td><em class="call">use random_seq_mod, only :</em></td>
-<td><a href="#random_seq_type">random_seq_type</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#init_random_seq">init_random_seq</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#random_uniform">random_uniform</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#random_gaussian">random_gaussian</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href=
-"#several_random_gaussians">several_random_gaussians</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#twod_gaussians">twod_gaussians</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#random_gamma">random_gamma</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#random_inverse_gamma">random_inverse_gamma</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#random_exponential">random_exponential</a></td>
-</tr>
-</table>
-<p>A note about documentation style. Optional arguments are
-enclosed in brackets <em class="optionalcode">[like this]</em>.</p>
-<!--=================== DESCRIPTION OF A LOCAL TYPE ==================-->
-<a name="random_seq_type" id="random_seq_type"></a><br>
-<div class="routine">
-<pre>
-<em class="call">type random_seq_type</em>
-   private
+MODULE random_seq_mod
+=====================
 
-   integer     :: mti
-   integer(i8) :: mt(624)
-   real(r8)    :: lastg
-   logical     :: gset
+Overview
+--------
 
-end type random_seq_type
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>This type is used to uniquely identify a sequence. Keeps the
-state history of the linear congruential number generator. In this
-implementation it is based on the Mersenne Twister from the GNU
-Scientific Library.</p>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="init_random_seq" id="init_random_seq"></a><br>
-<div class="routine"><em class="call">call init_random_seq(r,
-<em class="optionalcode">[,  seed]</em>)</em>
-<pre>
-type(random_seq_type),           intent(inout) :: <em class=
-"code">r</em>
-integer,               optional, intent(in)    :: <em class=
-"optionalcode">seed</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Initializes a random sequence for use. This must be called
-before any random numbers can be generated from this sequence. Any
-number of independent, reproducible random sequences can be
-generated by having multiple instances of a random_seq_type. A
-specified integer seed, optional, can produce a specific 'random'
-sequence.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>A random sequence type to be initialized.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">seed</em></td>
-<td>A seed for a random sequence.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="random_uniform" id="random_uniform"></a><br>
-<div class="routine"><em class="call">var = random_uniform(r)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">random_uniform</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from a uniform distribution on interval
-[0,1].</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">random_uniform</em></td>
-<td>A random draw from a Uniform[0,1] distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="random_gaussian" id="random_gaussian"></a><br>
-<div class="routine"><em class="call">var = random_gaussian(r,
-mean, standard_deviation)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">random_gaussian</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-real(r8),              intent(in)    :: <em class="code">mean</em>
-real(r8),              intent(in)    :: <em class=
-"code">standard_deviation</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from a Gaussian distribution with the
-specified mean and standard deviation.</p>
-<p>See <a href=
-"https://en.wikipedia.org/wiki/Normal_distribution">this Wikipedia
-page</a> for more explanation about this function.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">random_gaussian</em></td>
-<td>A random draw from a gaussian distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">mean</em></td>
-<td>Mean of the gaussian.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">standard_deviation</em></td>
-<td>Standard deviation of the gaussian.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="several_random_gaussians" id=
-"several_random_gaussians"></a><br>
-<div class="routine"><em class="call">call
-several_random_gaussians(r, mean, standard_deviation, n, rnum)</em>
-<pre>
-type(random_seq_type),  intent(inout) :: <em class="code">r</em>
-real(r8),               intent(in)    :: <em class="code">mean</em>
-real(r8),               intent(in)    :: <em class=
-"code">standard_deviation</em>
-integer,                intent(in)    :: <em class="code">n</em>
-real(r8), dimension(:), intent(out)   :: <em class="code">rnum</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns <em class="code">n</em> random samples from a gaussian
-distribution with the specified mean and standard deviation. Array
-<em class="code">rnum</em> must be at least size <em class=
-"code">n</em>.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">mean</em></td>
-<td>Mean of the Gaussian to be sampled.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">standard_deviation</em></td>
-<td>Standard deviation of the Gaussian.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">n</em></td>
-<td>Number of samples to return</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rnum</em></td>
-<td>The random samples of the Gaussian.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="twod_gaussians" id="twod_gaussians"></a><br>
-<div class="routine"><em class="call">call twod_gaussians(r, mean,
-cov, rnum)</em>
-<pre>
-type(random_seq_type),    intent(inout) :: <em class="code">r</em>
-real(r8), dimension(2),   intent(in)    :: <em class=
-"code">mean</em>
-real(r8), dimension(2,2), intent(in)    :: <em class=
-"code">cov</em>
-real(r8), dimension(2),   intent(out)   :: <em class=
-"code">rnum</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from a 2D gaussian distribution with the
-specified mean and covariance.</p>
-<p>The algorithm used is from Knuth, exercise 13, section 3.4.1.
-See <a href=
-"https://en.wikipedia.org/wiki/Multivariate_normal_distribution">this
-Wikipedia page</a> for more explanation about this function.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">mean</em></td>
-<td>Mean of 2D gaussian distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">cov</em></td>
-<td>Covariance of 2D gaussian.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rnum</em></td>
-<td>Returned random draw from gaussian.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="random_gamma" id="random_gamma"></a><br>
-<div class="routine"><em class="call">var = random_gamma(r, rshape,
-rscale)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">random_gamma</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-real(r8),              intent(in)    :: <em class=
-"code">rshape</em>
-real(r8),              intent(in)    :: <em class=
-"code">rscale</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from a Gamma distribution with specified
-<em class="code">rshape</em> and <em class="code">rscale</em>. Both
-must be positive.</p>
-<p>Note that there are three different parameterizations in common
-use:</p>
-<ol>
-<li>With shape parameter κ (kappa) and scale parameter θ
-(theta).</li>
-<li>With shape parameter α (alpha) and rate parameter β (beta).<br>
-Alpha is the same as kappa, and beta is an inverse scale parameter
-so β = 1/θ.</li>
-<li>With shape parameter κ (kappa) and mean parameter μ (mu).<br>
-μ = κ/β, so β = κ/μ.</li>
-</ol>
-This form uses the first parameterization, shape (κ) and scale (θ).
-The distribution mean is κθ and the variance is κ(θ²).
-<p>This routine is based on the Gamma(a,b) generator from the GNU
-Scientific library. See <a href=
-"https://en.wikipedia.org/wiki/Gamma_distribution">this Wikipedia
-page</a> for more explanation of the various parameterizations of
-this function.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">random_gamma</em></td>
-<td>A random draw from a gamma distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rshape</em></td>
-<td>Shape parameter. Often written as either alpha or kappa.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rscale</em></td>
-<td>Scale parameter. Often written as theta. If you have a rate
-parameter (often beta) pass in (1/rate) for scale.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="random_inverse_gamma" id="random_inverse_gamma"></a><br>
-<div class="routine"><em class="call">var = random_inverse_gamma(r,
-rshape, rscale)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">random_inverse_gamma</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-real(r8),              intent(in)    :: <em class=
-"code">rshape</em>
-real(r8),              intent(in)    :: <em class=
-"code">rscale</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from an inverse Gamma distribution with
-the specified <em class="code">shape</em> and <em class=
-"code">scale</em>. Both must be positive. If you have 'rate'
-instead of 'scale' pass in (1/rate) for scale.</p>
-<p>See <a href=
-"https://en.wikipedia.org/wiki/Inverse-gamma_distribution">this
-Wikipedia page</a> for more explanation about this function.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">random_inverse_gamma</em></td>
-<td>A random draw from an inverse gamma distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rshape</em></td>
-<td>Shape parameter. Often written as either alpha or kappa.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rscale</em></td>
-<td>Scale parameter. Often written as theta. If you have a rate
-parameter (often beta) pass in (1/rate) for scale.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="random_exponential" id="random_exponential"></a><br>
-<div class="routine"><em class="call">var = random_exponential(r,
-rate)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">random_exponential</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-real(r8),              intent(in)    :: <em class="code">rate</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Returns a random draw from an exponential distribution with the
-specified <em class="code">rate</em>. If you have a scale parameter
-(which is the same as the mean, the standard deviation, and the
-survival parameter), specify (1/scale) for rate.</p>
-<p>See <a href=
-"https://en.wikipedia.org/wiki/Exponential_distribution">this
-Wikipedia page</a> for more explanation about this function.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">random_exponential</em></td>
-<td>A random draw from an exponential distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>An initialized random sequence type.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rate</em></td>
-<td>Rate parameter. Often written as lambda. If you have a scale
-parameter pass in (1/scale) for rate.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--==================================================================-->
-<!--=================== DESCRIPTION OF A NAMELIST  ===================-->
-<!--==================================================================-->
- <a name="Namelist" id="Namelist"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>NAMELIST</h2>
-<p>This module has no namelist input.</p>
-<!--==================================================================-->
-<!-- Describe the Files Used by this module.                          -->
-<!--==================================================================-->
-<a name="FilesUsed" id="FilesUsed"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>FILES</h2>
-<ul>
-<li>NONE</li>
-</ul>
-<!--==================================================================-->
-<!-- Cite references, if need be.                                     -->
-<!--==================================================================-->
-<a name="References" id="References"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>REFERENCES</h2>
-<ol>
-<li>Knuth, Vol 2.</li>
-<li><a href=
-"http://www.gnu.org/software/gsl/manual/html_node/Random-Number-Generation.html">
-GNU Scientific Library Reference Manual</a></li>
-</ol>
-<!--==================================================================-->
-<!-- Describe all the error conditions and codes.                     -->
-<!--==================================================================-->
-<a name="Errors" id="Errors"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>ERROR CODES and CONDITIONS</h2>
-<div class="errors">
-<table border="1" cellspacing="1" cellpadding="10" width="100%">
-<tr>
-<th>Routine</th>
-<th>Message</th>
-<th>Comment</th>
-</tr>
-<tr><!-- routine -->
-<td valign="top"> </td>
-<!-- message -->
-<td valign="top"> </td>
-<!-- comment -->
-<td valign="top"> </td>
-</tr>
-</table>
-</div>
-<h2>KNOWN BUGS</h2>
-<p>none at this time</p>
-<!--==================================================================-->
-<!-- Describe Future Plans.                                           -->
-<!--==================================================================-->
-<a name="FuturePlans" id="FuturePlans"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>FUTURE PLANS</h2>
-<p>none at this time</p>
-<!--==================================================================-->
-<!-- PrivateComponents                                                -->
-<!--==================================================================-->
-<a name="PrivateComponents" id="PrivateComponents"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>PRIVATE COMPONENTS</h2>
-<table>
-<tr>
-<td> </td>
-<td><a href="#init_ran">init_ran</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#ran_unif">ran_unif</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#ran_gauss">ran_gauss</a></td>
-</tr>
-<tr>
-<td> </td>
-<td><a href="#ran_gamma">ran_gamma</a></td>
-</tr>
-</table>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
-<a name="init_ran" id="init_ran"></a><br>
-<div class="routine"><em class="call">call init_ran(s, seed)</em>
-<pre>
-type(random_seq_type), intent(out) :: <em class="code">s</em>
-integer,               intent(in)  :: <em class="code">seed</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Initializes a random sequence with an integer. Any sequence
-initialized with the same integer will produce the same sequence of
-pseudo-random numbers.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">s</em></td>
-<td>A random sequence to be initialized</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">seed</em></td>
-<td>An integer seed to start the sequence.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="ran_unif" id="ran_unif"></a><br>
-<div class="routine"><em class="call">var = ran_unif(s)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">ran_unif</em>
-type(random_seq_type), intent(inout) :: <em class="code">s</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Generate the next uniform [0, 1] random number in the
-sequence.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">ran_unif</em></td>
-<td>Next uniformly distributed [0, 1] number in sequence.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">s</em></td>
-<td>A random sequence.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="ran_gauss" id="ran_gauss"></a><br>
-<div class="routine"><em class="call">var = ran_gauss(s)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">ran_gauss</em>
-type(random_seq_type), intent(inout) :: <em class="code">s</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Generates a random draw from a standard gaussian.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">ran_gauss</em></td>
-<td>A random draw from a standard gaussian.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">s</em></td>
-<td>A random sequence.</td>
-</tr>
-</table>
-</div>
-<br>
-<!--===================== DESCRIPTION OF A ROUTINE =====================-->
- <a name="ran_gamma" id="ran_gamma"></a><br>
-<div class="routine"><em class="call">var = ran_gamma(r, rshape,
-rscale)</em>
-<pre>
-real(r8)                             :: <em class=
-"code">ran_gamma</em>
-type(random_seq_type), intent(inout) :: <em class="code">r</em>
-real(r8),              intent(in)    :: <em class=
-"code">rshape</em>
-real(r8),              intent(in)    :: <em class=
-"code">rscale</em>
-</pre></div>
-<div class="indent1"><!-- Description -->
-<p>Generates a random draw from a Gamma distribution. See notes in
-the <a href="#random_gamma">random_gamma()</a> section about
-(alpha,beta) vs (kappa,theta) vs (kappa,mu) parameterizations. This
-is transcribed from C code in the GNU Scientific library and keeps
-the (shape,scale) interface.</p>
-<table width="100%" border="0" summary="" cellpadding="3">
-<tr>
-<td valign="top"><em class="code">ran_gamma</em></td>
-<td>A random draw from a Gamma distribution.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">r</em></td>
-<td>A random sequence.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rshape</em></td>
-<td>Shape parameter.</td>
-</tr>
-<tr>
-<td valign="top"><em class="code">rscale</em></td>
-<td>Scale parameter. (This is the inverse of a rate
-parameter.)</td>
-</tr>
-</table>
-</div>
-<br>
-<!--==================================================================-->
-<!-- Legalese & Metadata                                              -->
-<!--==================================================================-->
- <a name="Legalese" id="Legalese"></a>
-<div class="top">[<a href="#">top</a>]</div>
-<hr>
-<h2>Terms of Use</h2>
-<p>DART software - Copyright UCAR. This open source software is
-provided by UCAR, "as is", without charge, subject to all terms of
-use at <a href=
-"http://www.image.ucar.edu/DAReS/DART/DART_download">http://www.image.ucar.edu/DAReS/DART/DART_download</a></p>
-<!--==================================================================-->
-</body>
-</html>
+Provides access to any number of reproducible random sequences. Can sample from uniform, gaussian, two-dimensional
+gaussian, gamma, inverse gamma, and exponential distributions.
+
+The current random sequence generator is a Fortran version of the `GNU Library <http://www.gnu.org/software/gsl/>`__
+implementation of the `Mersenne Twister <http://en.wikipedia.org/wiki/Mersenne_twister>`__ algorithm. The original code
+is in the C language and the conversion to Fortran was done by the DART team.
+
+There are test programs in the ``developer_tests/random_seq`` directory which show examples of calling these routines.
+Build and run these tests in the ``test`` subdirectory.
+
+Other modules used
+------------------
+
+::
+
+   types_mod
+   utilities_mod
+
+Public interfaces
+-----------------
+
+============================ ========================
+*use random_seq_mod, only :* random_seq_type
+\                            init_random_seq
+\                            random_uniform
+\                            random_gaussian
+\                            several_random_gaussians
+\                            twod_gaussians
+\                            random_gamma
+\                            random_inverse_gamma
+\                            random_exponential
+============================ ========================
+
+A note about documentation style. Optional arguments are enclosed in brackets *[like this]*.
+
+| 
+
+.. container:: routine
+
+   ::
+
+      type random_seq_type
+         private
+
+         integer     :: mti
+         integer(i8) :: mt(624)
+         real(r8)    :: lastg
+         logical     :: gset
+
+      end type random_seq_type
+
+.. container:: indent1
+
+   This type is used to uniquely identify a sequence. Keeps the state history of the linear congruential number
+   generator. In this implementation it is based on the Mersenne Twister from the GNU Scientific Library.
+
+| 
+
+.. container:: routine
+
+   *call init_random_seq(r, [, seed])*
+   ::
+
+      type(random_seq_type),           intent(inout) :: r
+      integer,               optional, intent(in)    :: seed
+
+.. container:: indent1
+
+   Initializes a random sequence for use. This must be called before any random numbers can be generated from this
+   sequence. Any number of independent, reproducible random sequences can be generated by having multiple instances of a
+   random_seq_type. A specified integer seed, optional, can produce a specific 'random' sequence.
+
+   ======== =========================================
+   ``r``    A random sequence type to be initialized.
+   ``seed`` A seed for a random sequence.
+   ======== =========================================
+
+| 
+
+.. container:: routine
+
+   *var = random_uniform(r)*
+   ::
+
+      real(r8)                             :: random_uniform
+      type(random_seq_type), intent(inout) :: r
+
+.. container:: indent1
+
+   Returns a random draw from a uniform distribution on interval [0,1].
+
+   ================== ===============================================
+   ``random_uniform`` A random draw from a Uniform[0,1] distribution.
+   ``r``              An initialized random sequence type.
+   ================== ===============================================
+
+| 
+
+.. container:: routine
+
+   *var = random_gaussian(r, mean, standard_deviation)*
+   ::
+
+      real(r8)                             :: random_gaussian
+      type(random_seq_type), intent(inout) :: r
+      real(r8),              intent(in)    :: mean
+      real(r8),              intent(in)    :: standard_deviation
+
+.. container:: indent1
+
+   Returns a random draw from a Gaussian distribution with the specified mean and standard deviation.
+
+   See `this Wikipedia page <https://en.wikipedia.org/wiki/Normal_distribution>`__ for more explanation about this
+   function.
+
+   ====================== ===========================================
+   ``random_gaussian``    A random draw from a gaussian distribution.
+   ``r``                  An initialized random sequence type.
+   ``mean``               Mean of the gaussian.
+   ``standard_deviation`` Standard deviation of the gaussian.
+   ====================== ===========================================
+
+| 
+
+.. container:: routine
+
+   *call several_random_gaussians(r, mean, standard_deviation, n, rnum)*
+   ::
+
+      type(random_seq_type),  intent(inout) :: r
+      real(r8),               intent(in)    :: mean
+      real(r8),               intent(in)    :: standard_deviation
+      integer,                intent(in)    :: n
+      real(r8), dimension(:), intent(out)   :: rnum
+
+.. container:: indent1
+
+   Returns ``n`` random samples from a gaussian distribution with the specified mean and standard deviation. Array
+   ``rnum`` must be at least size ``n``.
+
+   ====================== ====================================
+   ``r``                  An initialized random sequence type.
+   ``mean``               Mean of the Gaussian to be sampled.
+   ``standard_deviation`` Standard deviation of the Gaussian.
+   ``n``                  Number of samples to return
+   ``rnum``               The random samples of the Gaussian.
+   ====================== ====================================
+
+| 
+
+.. container:: routine
+
+   *call twod_gaussians(r, mean, cov, rnum)*
+   ::
+
+      type(random_seq_type),    intent(inout) :: r
+      real(r8), dimension(2),   intent(in)    :: mean
+      real(r8), dimension(2,2), intent(in)    :: cov
+      real(r8), dimension(2),   intent(out)   :: rnum
+
+.. container:: indent1
+
+   Returns a random draw from a 2D gaussian distribution with the specified mean and covariance.
+
+   The algorithm used is from Knuth, exercise 13, section 3.4.1. See `this Wikipedia
+   page <https://en.wikipedia.org/wiki/Multivariate_normal_distribution>`__ for more explanation about this function.
+
+   ======== ====================================
+   ``r``    An initialized random sequence type.
+   ``mean`` Mean of 2D gaussian distribution.
+   ``cov``  Covariance of 2D gaussian.
+   ``rnum`` Returned random draw from gaussian.
+   ======== ====================================
+
+| 
+
+.. container:: routine
+
+   *var = random_gamma(r, rshape, rscale)*
+   ::
+
+      real(r8)                             :: random_gamma
+      type(random_seq_type), intent(inout) :: r
+      real(r8),              intent(in)    :: rshape
+      real(r8),              intent(in)    :: rscale
+
+.. container:: indent1
+
+   Returns a random draw from a Gamma distribution with specified ``rshape`` and ``rscale``. Both must be positive.
+
+   Note that there are three different parameterizations in common use:
+
+   #. With shape parameter κ (kappa) and scale parameter θ (theta).
+   #. With shape parameter α (alpha) and rate parameter β (beta).
+      Alpha is the same as kappa, and beta is an inverse scale parameter so β = 1/θ.
+   #. With shape parameter κ (kappa) and mean parameter μ (mu).
+      μ = κ/β, so β = κ/μ.
+
+   This form uses the first parameterization, shape (κ) and scale (θ). The distribution mean is κθ and the variance is
+   κ(θ²).
+   This routine is based on the Gamma(a,b) generator from the GNU Scientific library. See `this Wikipedia
+   page <https://en.wikipedia.org/wiki/Gamma_distribution>`__ for more explanation of the various parameterizations of
+   this function.
+
+   +------------------+--------------------------------------------------------------------------------------------------+
+   | ``random_gamma`` | A random draw from a gamma distribution.                                                         |
+   +------------------+--------------------------------------------------------------------------------------------------+
+   | ``r``            | An initialized random sequence type.                                                             |
+   +------------------+--------------------------------------------------------------------------------------------------+
+   | ``rshape``       | Shape parameter. Often written as either alpha or kappa.                                         |
+   +------------------+--------------------------------------------------------------------------------------------------+
+   | ``rscale``       | Scale parameter. Often written as theta. If you have a rate parameter (often beta) pass in       |
+   |                  | (1/rate) for scale.                                                                              |
+   +------------------+--------------------------------------------------------------------------------------------------+
+
+| 
+
+.. container:: routine
+
+   *var = random_inverse_gamma(r, rshape, rscale)*
+   ::
+
+      real(r8)                             :: random_inverse_gamma
+      type(random_seq_type), intent(inout) :: r
+      real(r8),              intent(in)    :: rshape
+      real(r8),              intent(in)    :: rscale
+
+.. container:: indent1
+
+   Returns a random draw from an inverse Gamma distribution with the specified ``shape`` and ``scale``. Both must be
+   positive. If you have 'rate' instead of 'scale' pass in (1/rate) for scale.
+
+   See `this Wikipedia page <https://en.wikipedia.org/wiki/Inverse-gamma_distribution>`__ for more explanation about
+   this function.
+
+   +--------------------------+------------------------------------------------------------------------------------------+
+   | ``random_inverse_gamma`` | A random draw from an inverse gamma distribution.                                        |
+   +--------------------------+------------------------------------------------------------------------------------------+
+   | ``r``                    | An initialized random sequence type.                                                     |
+   +--------------------------+------------------------------------------------------------------------------------------+
+   | ``rshape``               | Shape parameter. Often written as either alpha or kappa.                                 |
+   +--------------------------+------------------------------------------------------------------------------------------+
+   | ``rscale``               | Scale parameter. Often written as theta. If you have a rate parameter (often beta) pass  |
+   |                          | in (1/rate) for scale.                                                                   |
+   +--------------------------+------------------------------------------------------------------------------------------+
+
+| 
+
+.. container:: routine
+
+   *var = random_exponential(r, rate)*
+   ::
+
+      real(r8)                             :: random_exponential
+      type(random_seq_type), intent(inout) :: r
+      real(r8),              intent(in)    :: rate
+
+.. container:: indent1
+
+   Returns a random draw from an exponential distribution with the specified ``rate``. If you have a scale parameter
+   (which is the same as the mean, the standard deviation, and the survival parameter), specify (1/scale) for rate.
+
+   See `this Wikipedia page <https://en.wikipedia.org/wiki/Exponential_distribution>`__ for more explanation about this
+   function.
+
+   +------------------------+----------------------------------------------------------------------------------------------------+
+   | ``random_exponential`` | A random draw from an exponential distribution.                                                    |
+   +------------------------+----------------------------------------------------------------------------------------------------+
+   | ``r``                  | An initialized random sequence type.                                                               |
+   +------------------------+----------------------------------------------------------------------------------------------------+
+   | ``rate``               | Rate parameter. Often written as lambda. If you have a scale parameter pass in (1/scale) for rate. |
+   +------------------------+----------------------------------------------------------------------------------------------------+
+
+| 
+
+Namelist
+--------
+
+This module has no namelist input.
+
+Files
+-----
+
+-  NONE
+
+References
+----------
+
+#. Knuth, Vol 2.
+#. `GNU Scientific Library Reference
+   Manual <http://www.gnu.org/software/gsl/manual/html_node/Random-Number-Generation.html>`__
+
+Private components
+------------------
+
+== =========
+\  init_ran
+\  ran_unif
+\  ran_gauss
+\  ran_gamma
+== =========
+
+| 
+
+.. container:: routine
+
+   *call init_ran(s, seed)*
+   ::
+
+      type(random_seq_type), intent(out) :: s
+      integer,               intent(in)  :: seed
+
+.. container:: indent1
+
+   Initializes a random sequence with an integer. Any sequence initialized with the same integer will produce the same
+   sequence of pseudo-random numbers.
+
+   ======== ======================================
+   ``s``    A random sequence to be initialized
+   ``seed`` An integer seed to start the sequence.
+   ======== ======================================
+
+| 
+
+.. container:: routine
+
+   *var = ran_unif(s)*
+   ::
+
+      real(r8)                             :: ran_unif
+      type(random_seq_type), intent(inout) :: s
+
+.. container:: indent1
+
+   Generate the next uniform [0, 1] random number in the sequence.
+
+   ============ =====================================================
+   ``ran_unif`` Next uniformly distributed [0, 1] number in sequence.
+   ``s``        A random sequence.
+   ============ =====================================================
+
+| 
+
+.. container:: routine
+
+   *var = ran_gauss(s)*
+   ::
+
+      real(r8)                             :: ran_gauss
+      type(random_seq_type), intent(inout) :: s
+
+.. container:: indent1
+
+   Generates a random draw from a standard gaussian.
+
+   ============= =======================================
+   ``ran_gauss`` A random draw from a standard gaussian.
+   ``s``         A random sequence.
+   ============= =======================================
+
+| 
+
+.. container:: routine
+
+   *var = ran_gamma(r, rshape, rscale)*
+   ::
+
+      real(r8)                             :: ran_gamma
+      type(random_seq_type), intent(inout) :: r
+      real(r8),              intent(in)    :: rshape
+      real(r8),              intent(in)    :: rscale
+
+.. container:: indent1
+
+   Generates a random draw from a Gamma distribution. See notes in the random_gamma() section about (alpha,beta) vs
+   (kappa,theta) vs (kappa,mu) parameterizations. This is transcribed from C code in the GNU Scientific library and
+   keeps the (shape,scale) interface.
+
+   ============= ===========================================================
+   ``ran_gamma`` A random draw from a Gamma distribution.
+   ``r``         A random sequence.
+   ``rshape``    Shape parameter.
+   ``rscale``    Scale parameter. (This is the inverse of a rate parameter.)
+   ============= ===========================================================
+
+| 
