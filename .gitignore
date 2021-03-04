@@ -12,6 +12,7 @@ _site/
 
 # sphinx build folder
 _build
+__pycache__
 
 # Nuisance files
 
